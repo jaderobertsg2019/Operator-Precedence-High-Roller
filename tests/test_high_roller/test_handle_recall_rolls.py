@@ -3,7 +3,7 @@ import sys
 import os
 ROOT_PATH = pathlib.Path(__file__).parents[2]
 sys.path.append(os.path.join(ROOT_PATH, ''))
-from operator_precedence_high_roller import high_roller
+import high_roller
 from operator_precedence_high_roller.json_handling.gambling.gamble import Gamble
 from operator_precedence_high_roller.parsing.command_parser import CommandParser
 from operator_precedence_high_roller.computing.compute import Compute

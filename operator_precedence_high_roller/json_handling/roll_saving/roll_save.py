@@ -10,6 +10,8 @@ from operator_precedence_high_roller.computing.compute import Compute
 import discord
 
 class RollSave:
+    #kh stuff is messing this up, change it at some point
+    #save multiple rolls as separate rolls
     def __init__(self, message: discord.Message, c: Compute):
         self.message = message
         self.c = c

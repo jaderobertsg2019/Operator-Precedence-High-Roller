@@ -46,3 +46,17 @@ class TestScanNumberOrRoll(unittest.TestCase):
         token = self.lexical_analyzer.scan_number_or_roll()
         self.assertEqual(token.TokenType, TokenType.ROLL)
         self.assertEqual(token.lexeme, '12d6')
+
+    def test_one_digit_num_rolls_keep_highest_one(self):
+        self.lexical_analyzer = LexicalAnalyzer("2d6kh")
+        self.lexical_analyzer.input = InputBuffer("2d6kh")
+        token = self.lexical_analyzer.scan_number_or_roll()
+        self.assertEqual(token.TokenType, TokenType.ROLL)
+        self.assertEqual(token.lexeme, '2d6kh')
+
+    def test_one_digit_num_rolls_keep_highest_2(self):
+        self.lexical_analyzer = LexicalAnalyzer("3d6kh2")
+        self.lexical_analyzer.input = InputBuffer("3d6kh2")
+        token = self.lexical_analyzer.scan_number_or_roll()
+        self.assertEqual(token.TokenType, TokenType.ROLL)
+        self.assertEqual(token.lexeme, '3d6kh2')
