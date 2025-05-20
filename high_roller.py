@@ -10,7 +10,6 @@ from operator_precedence_high_roller.json_handling.gambling.gamble import Gamble
 from operator_precedence_high_roller.json_handling.roll_saving.roll_save import RollSave
 import operator_precedence_high_roller.message_validator as mv
 
-#test
 intents = discord.Intents.all()
 client = discord.Client(command_prefix='!', intents=intents)
 
