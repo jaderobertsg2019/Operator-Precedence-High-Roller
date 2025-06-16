@@ -13,6 +13,7 @@ import operator_precedence_high_roller.message_validator as mv
 intents = discord.Intents.all()
 client = discord.Client(command_prefix='!', intents=intents)
 
+
 async def handle_expr(message: discord.Message, compute: Compute, rollSave: RollSave, commandParser: CommandParser):
     result = (0,0)
     try:
