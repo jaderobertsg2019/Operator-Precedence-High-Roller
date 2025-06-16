@@ -32,9 +32,14 @@ async def handle_expr(message: discord.Message, compute: Compute, rollSave: Roll
         await message.channel.send(to_send)
 
 async def handle_gamble_start(message: discord.Message, gamble: Gamble):
-    if not gamble.gambling():
+    if gamble.gambling():
+        await message.channel.send('you\'re already gambling!')
+    if not gamble.enough_figglebucks():
+        await message.channel.send('you don\'t have enough figglebucks!')
+    else:
         await message.channel.send('odds or evens?')
         gamble.update_gambling_state(True)
+        gamble.subtract_figglebucks()
 
 async def handle_gamble_bet(gamble: Gamble, commandParser: CommandParser):
     valid_bet = False
