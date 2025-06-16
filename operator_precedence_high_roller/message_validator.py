@@ -6,7 +6,8 @@ def channel_valid(message: discord.Message):
         "rolls",
         "dumpster",
         "box-of-doom",
-        "gamblers"
+        "gamblers",
+        "gamble"
     ]
     valid = False
     for word in keywords:
