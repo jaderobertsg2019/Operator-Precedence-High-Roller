@@ -19,9 +19,9 @@ async def handle_expr(message: discord.Message, compute: Compute, rollSave: Roll
     try:
         result = compute.compute_expr(commandParser.stack[1])
     except:
-        handle_error(message)
+        await handle_error(message)
     if compute.error or len(commandParser.stack) != 2:
-        handle_error(message)
+        await handle_error(message)
     else:
         rollSave.add_rolls_to_json()
         to_send = ""
@@ -29,7 +29,7 @@ async def handle_expr(message: discord.Message, compute: Compute, rollSave: Roll
             to_send += 'Honor the cock. Roll ' + str(compute.cocked_rolls[i][1]) + ' was cocked. It would have been ' + str(compute.cocked_rolls[i][0]) + '\n'
         to_send += str(result[0]) + '\nDetails: ' + str(compute.all_lists_of_rolls) + '\nAverage: ' + str(result[1])
         if len(commandParser.stack) != 2 or (len(to_send)) > 2000:
-            handle_error(message)
+            await handle_error(message)
         await message.channel.send(to_send)
 
 async def handle_gamble_start(message: discord.Message, gamble: Gamble):
@@ -82,7 +82,7 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
     if not mv.channel_valid(message) and mv.message_is_command(message):
-        handle_error(message)
+        await handle_error(message)
     elif mv.message_is_command(message):
         compute = Compute()
         gamble = Gamble(message)

@@ -29,7 +29,7 @@ class Compute:
         except:
             return None
         if (
-            num_rolls > 1000 or 
+            num_rolls > 100 or 
             num_sides > 10000 or
             num_rolls < 1 or
             num_sides < 1
@@ -141,30 +141,18 @@ class Compute:
         else:
             return None
     
-    def compute_expr(self, reduced_expr: StackNode): #this function is getting chunky. time to find ways to compress it
+    def compute_expr(self, reduced_expr: StackNode):
+        res_left = self.compute_expr(reduced_expr.left)
+        left_expr = (res_left[0], res_left[1])
+        res_right = self.compute_expr(reduced_expr.right)
+        right_expr = (res_right[0], res_right[1])
         if reduced_expr.oper == TokenType.PLUS:
-            res_left = self.compute_expr(reduced_expr.left)
-            left_expr = (res_left[0], res_left[1])
-            res_right = self.compute_expr(reduced_expr.right)
-            right_expr = (res_right[0], res_right[1])
             return (left_expr[0] + right_expr[0], left_expr[1] + right_expr[1])
         elif reduced_expr.oper == TokenType.MINUS:
-            res_left = self.compute_expr(reduced_expr.left)
-            left_expr = (res_left[0], res_left[1])
-            res_right = self.compute_expr(reduced_expr.right)
-            right_expr = (res_right[0], res_right[1])
             return (left_expr[0] - right_expr[0], left_expr[1] - right_expr[1])
         elif reduced_expr.oper == TokenType.MULT:
-            res_left = self.compute_expr(reduced_expr.left)
-            left_expr = (res_left[0], res_left[1])
-            res_right = self.compute_expr(reduced_expr.right)
-            right_expr = (res_right[0], res_right[1])
             return (left_expr[0] * right_expr[0], left_expr[1] * right_expr[1])
         elif reduced_expr.oper == TokenType.DIV:
-            res_left = self.compute_expr(reduced_expr.left)
-            left_expr = (res_left[0], res_left[1])
-            res_right = self.compute_expr(reduced_expr.right)
-            right_expr = (res_right[0], res_right[1])
             if right_expr[0] == 0:
                 self.error = True
                 return 0

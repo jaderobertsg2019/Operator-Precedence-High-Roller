@@ -34,15 +34,9 @@ class Gamble:
 
     async def determine_result(self):
         res = self.c.roll_die('d20')
-        if int(res[0]) % 2 == 0:
-            if self.even:
-                await self.message.channel.send(str(res[0]) + ' :money_mouth:')
-                self.json_handler.update_figglebucks(self.winnings)
-            else:
-                await self.message.channel.send(str(res[0]) + ' :japanese_ogre:')
+        roll_even = int(res[0]) % 2 == 0
+        if (roll_even and self.even) or (not roll_even and not self.even):
+            await self.message.channel.send(str(res[0]) + ' :money_mouth:')
+            self.json_handler.update_figglebucks(self.winnings)
         else:
-            if self.even:
-                await self.message.channel.send(str(res[0]) + ' :japanese_ogre:')
-            else:
-                await self.message.channel.send(str(res[0]) + ' :money_mouth:')
-                self.json_handler.update_figglebucks(self.winnings)
+            await self.message.channel.send(str(res[0]) + ' :japanese_ogre:')
