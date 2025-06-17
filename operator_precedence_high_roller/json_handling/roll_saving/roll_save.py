@@ -24,7 +24,6 @@ class RollSave:
             for roll in list_of_rolls:
                 roll_total += roll
             self.json_handler.add_roll(
-                self.message.author.name,
                 self.c.list_of_dice[i],
                 roll_total,
                 datetime.timestamp(datetime.now())
@@ -32,7 +31,7 @@ class RollSave:
             i += 1
 
     def get_rolls_from_json(self, hours:int=12, die:str="d20"):
-        rolls = self.json_handler.get_rolls(self.message.author.name)
+        rolls = self.json_handler.get_rolls()
         recent_rolls = []
         for i in range(len(rolls)):
             ts = rolls[i]["timestamp"]
