@@ -142,32 +142,34 @@ class Compute:
             return None
     
     def compute_expr(self, reduced_expr: StackNode):
-        res_left = self.compute_expr(reduced_expr.left)
-        left_expr = (res_left[0], res_left[1])
-        res_right = self.compute_expr(reduced_expr.right)
-        right_expr = (res_right[0], res_right[1])
-        if reduced_expr.oper == TokenType.PLUS:
-            return (left_expr[0] + right_expr[0], left_expr[1] + right_expr[1])
-        elif reduced_expr.oper == TokenType.MINUS:
-            return (left_expr[0] - right_expr[0], left_expr[1] - right_expr[1])
-        elif reduced_expr.oper == TokenType.MULT:
-            return (left_expr[0] * right_expr[0], left_expr[1] * right_expr[1])
-        elif reduced_expr.oper == TokenType.DIV:
-            if right_expr[0] == 0:
+        try:
+            res_left = self.compute_expr(reduced_expr.left)
+            left_expr = (res_left[0], res_left[1])
+            res_right = self.compute_expr(reduced_expr.right)
+            right_expr = (res_right[0], res_right[1])
+            if reduced_expr.oper == TokenType.PLUS:
+                return (left_expr[0] + right_expr[0], left_expr[1] + right_expr[1])
+            elif reduced_expr.oper == TokenType.MINUS:
+                return (left_expr[0] - right_expr[0], left_expr[1] - right_expr[1])
+            elif reduced_expr.oper == TokenType.MULT:
+                return (left_expr[0] * right_expr[0], left_expr[1] * right_expr[1])
+            elif reduced_expr.oper == TokenType.DIV:
+                if right_expr[0] == 0:
+                    self.error = True
+                    return 0
+                return (int(left_expr[0] / right_expr[0]), int(left_expr[1] / right_expr[1]))
+        except:
+            if reduced_expr.token_info.TokenType == TokenType.ERROR:
                 self.error = True
                 return 0
-            return (int(left_expr[0] / right_expr[0]), int(left_expr[1] / right_expr[1]))
-        elif reduced_expr.token_info.TokenType == TokenType.ERROR:
-            self.error = True
-            return 0
-        elif 'd' in reduced_expr.token_info.lexeme:
-            to_roll = reduced_expr.token_info.lexeme
-            res = self.roll_die(to_roll)
-            return (res[0], res[1])
-        elif 'e' in reduced_expr.token_info.lexeme:
-            to_roll = reduced_expr.token_info.lexeme
-            res = self.roll_exploding_die(to_roll)
-            return (res[0], res[1])
-        else:
-            num = int(reduced_expr.token_info.lexeme)
-            return (num, num)
+            elif 'd' in reduced_expr.token_info.lexeme:
+                to_roll = reduced_expr.token_info.lexeme
+                res = self.roll_die(to_roll)
+                return (res[0], res[1])
+            elif 'e' in reduced_expr.token_info.lexeme:
+                to_roll = reduced_expr.token_info.lexeme
+                res = self.roll_exploding_die(to_roll)
+                return (res[0], res[1])
+            else:
+                num = int(reduced_expr.token_info.lexeme)
+                return (num, num)
