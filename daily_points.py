@@ -4,7 +4,8 @@ def add_points():
     with open('player_info.json', 'r') as openfile: player_info_object = json.load(openfile)
     for index in range(len(player_info_object["players"])):
         try:
-            player_info_object["players"][index]["figglebucks"] = int(player_info_object["players"][index]["figglebucks"]) + 5
+            if player_info_object["players"][index]["figglebucks"] == 0:
+                player_info_object["players"][index]["figglebucks"] = int(player_info_object["players"][index]["figglebucks"]) + 5
         except:
             pass
     json_object = json.dumps(player_info_object, indent=2)
