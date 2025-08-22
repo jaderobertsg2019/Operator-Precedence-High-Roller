@@ -233,7 +233,7 @@ class CommandParser:
             self.command_type = CommandType.ERROR
             return None
 
-    def more_expr_parsing(self):
+    def keep_parsing(self):
         return (
             not self.terminal_peek().token_info.TokenType == TokenType.END_OF_FILE or
             not self.lexer.peek(1).TokenType == TokenType.END_OF_FILE
@@ -242,7 +242,7 @@ class CommandParser:
     def parse_expr(self):
         self.command_type = CommandType.EXPR
         table = self.define_operator_precedence_table()
-        while self.more_expr_parsing():
+        while self.keep_parsing():
             t = self.lexer.peek(1)
             a = self.terminal_peek().token_info.TokenType.value
             b = t.TokenType.value

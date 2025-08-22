@@ -54,7 +54,7 @@ class LexicalAnalyzer:
         tmp.TokenType = TokenType.ERROR
         return tmp
     
-    def scan_num_sides_or_num_keeps(self, tmp: Token, c):
+    def scan_num_sides_or_keeps(self, tmp: Token, c):
         while not self.input.end_of_input() and self.isdigit(c):
             tmp.lexeme += c
             c = self.input.get_char()
@@ -64,14 +64,24 @@ class LexicalAnalyzer:
         return tmp
 
     def scan_potential_roll_mod(self, tmp: Token, c):
-        tmp = self.scan_num_sides_or_num_keeps(tmp, c)
+        tmp = self.scan_num_sides_or_keeps(tmp, c)
         c1 = self.input.get_char()
         c2 = self.input.get_char()
         if (c1 + c2) == 'kh':
             tmp.lexeme += (c1 + c2)
             c = self.input.get_char()
             if(self.isdigit(c)):
-                return self.scan_num_sides_or_num_keeps(tmp, c)
+                return self.scan_num_sides_or_keeps(tmp, c)
+            else:
+                if not self.input.end_of_input():
+                    self.input.unget_char(c)
+                tmp.TokenType = TokenType.ROLL
+                return tmp
+        elif (c1 + c2) == 'kl':
+            tmp.lexeme += (c1 + c2)
+            c = self.input.get_char()
+            if(self.isdigit(c)):
+                return self.scan_num_sides_or_keeps(tmp, c)
             else:
                 if not self.input.end_of_input():
                     self.input.unget_char(c)
@@ -114,7 +124,7 @@ class LexicalAnalyzer:
             tmp.lexeme += c
             c = self.input.get_char()
             if self.isdigit(c):
-                return self.scan_num_sides_or_num_keeps(tmp, c)
+                return self.scan_num_sides_or_keeps(tmp, c)
             else:
                 return self.scan_error(tmp, c)
         else:
