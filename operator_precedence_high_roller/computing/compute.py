@@ -21,6 +21,17 @@ class Compute:
             final_list.append(maxVal)
             b[maxIndex] = minimum
         return final_list
+    
+    def find_min_rolls(self, list_of_rolls, num_keeps):
+        b = list_of_rolls[:]
+        final_list = []
+        maximum = max(b) + 1
+        for i in range(num_keeps):
+            minIndex = b.index(min(b))
+            minVal = min(b)
+            final_list.append(minVal)
+            b[minIndex] = maximum
+        return final_list
 
     def roll_regular_die(self, to_roll: str):
         try:
@@ -113,28 +124,46 @@ class Compute:
             roll = random.randint(1, num_sides)
             list_of_rolls.append(roll)
         self.all_lists_of_rolls.append(list_of_rolls)
-
         #there's probably a formula/process to accurately calculate the average for any of these, but idk what it is yet
         roll_avg = 0
-        if num_rolls == 2: #2dxkh
-            for i in range(num_sides):
-                roll_avg += (i+1)*(2*(i+1)-1)
-            roll_avg /= (num_sides**2)
-        elif num_rolls == 3: #3dxkh
-            for i in range(num_sides):
-                roll_avg += (i+1)*(3*(i+1)**2-3*(i+1)+1)
-            roll_avg /= (num_sides**3)
-        if num_rolls == 4: #4dxkh
-            for i in range(num_sides):
-                roll_avg += (i+1)*(4*(i+1)**3-6*(i+1)**2+4*(i+1)-1)
-            roll_avg /= (num_sides**4)
         self.list_of_dice.append(('' if num_rolls == 1 else str(num_rolls)) + 'd' + str(num_sides))
         return (sum(self.find_max_rolls(list_of_rolls, num_keeps)), roll_avg)
+
+    def roll_kl_die(self, to_roll: str):
+        try:
+            num_rolls = int(to_roll[:to_roll.index('d')]) if to_roll[:to_roll.index('d')] != '' else 1
+            num_sides = int(to_roll[to_roll.index('d')+1:to_roll.index('kl')])
+            num_keeps = int(to_roll[to_roll.index('kl')+2:]) if to_roll[to_roll.index('kl')+2:] != '' else 1
+        except:
+            return None
+        if (
+            num_rolls > 1000 or 
+            num_sides > 10000 or 
+            num_rolls == num_keeps or 
+            num_rolls < 1 or
+            num_sides < 1 or
+            num_keeps < 1 
+        ):
+            self.error = True
+            return None
+        list_of_rolls = []
+        for i in range(num_rolls):
+            self.i += 1
+            if random.random() < self.cocked_odds:
+                self.cocked_rolls.append((random.randint(1, num_sides), self.i))
+            roll = random.randint(1, num_sides)
+            list_of_rolls.append(roll)
+        self.all_lists_of_rolls.append(list_of_rolls)
+        roll_avg = 0
+        self.list_of_dice.append(('' if num_rolls == 1 else str(num_rolls)) + 'd' + str(num_sides))
+        return (sum(self.find_min_rolls(list_of_rolls, num_keeps)), roll_avg)
     
     def roll_die(self, to_roll: str):
         if 'kh' in to_roll:
             return self.roll_kh_die(to_roll)
-        if 'd' in to_roll:
+        if 'kl' in to_roll:
+            return self.roll_kl_die(to_roll)
+        elif 'd' in to_roll:
             return self.roll_regular_die(to_roll)
         elif 'e' in to_roll:
             return self.roll_exploding_die(to_roll)
