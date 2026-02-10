@@ -11,10 +11,12 @@ class Compute:
         self.error = False
         self.cocked_odds = 0.025
 
-    def find_max_rolls(self, list_of_rolls, num_keeps):
+    def find_max_rolls(self, list_of_rolls, num_cuts, num_keeps):
         b = list_of_rolls[:]
         final_list = []
         minimum = min(b) - 1
+        for i in range(num_cuts):
+            b.remove(max(b))
         for i in range(num_keeps):
             maxIndex = b.index(max(b))
             maxVal = max(b)
@@ -102,7 +104,13 @@ class Compute:
     def roll_kh_die(self, to_roll: str):
         try:
             num_rolls = int(to_roll[:to_roll.index('d')]) if to_roll[:to_roll.index('d')] != '' else 1
-            num_sides = int(to_roll[to_roll.index('d')+1:to_roll.index('kh')])
+            num_cuts = 0
+            num_keeps = 0
+            if('c' in to_roll):
+                num_sides = int(to_roll[to_roll.index('d')+1:to_roll.index('c')])
+                num_cuts = int(to_roll[to_roll.index('c')+1:to_roll.index('kh')])
+            else:
+                num_sides = int(to_roll[to_roll.index('d')+1:to_roll.index('kh')])
             num_keeps = int(to_roll[to_roll.index('kh')+2:]) if to_roll[to_roll.index('kh')+2:] != '' else 1
         except:
             return None
@@ -112,6 +120,7 @@ class Compute:
             num_rolls == num_keeps or 
             num_rolls < 1 or
             num_sides < 1 or
+            num_cuts > num_keeps or
             num_keeps < 1 
         ):
             self.error = True
@@ -127,7 +136,7 @@ class Compute:
         #there's probably a formula/process to accurately calculate the average for any of these, but idk what it is yet
         roll_avg = 0
         self.list_of_dice.append(('' if num_rolls == 1 else str(num_rolls)) + 'd' + str(num_sides))
-        return (sum(self.find_max_rolls(list_of_rolls, num_keeps)), roll_avg)
+        return (sum(self.find_max_rolls(list_of_rolls, num_cuts, num_keeps)), roll_avg)
 
     def roll_kl_die(self, to_roll: str):
         try:
@@ -161,7 +170,7 @@ class Compute:
     def roll_die(self, to_roll: str):
         if 'kh' in to_roll:
             return self.roll_kh_die(to_roll)
-        if 'kl' in to_roll:
+        elif 'kl' in to_roll:
             return self.roll_kl_die(to_roll)
         elif 'd' in to_roll:
             return self.roll_regular_die(to_roll)
