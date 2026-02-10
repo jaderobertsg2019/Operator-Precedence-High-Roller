@@ -67,6 +67,10 @@ class LexicalAnalyzer:
         tmp = self.scan_num_sides_or_keeps(tmp, c)
         c1 = self.input.get_char()
         c2 = self.input.get_char()
+        if(c1 == 'c' and self.isdigit(c2)):
+            tmp.lexeme += (c1 + c2)
+        c1 = self.input.get_char()
+        c2 = self.input.get_char()
         if (c1 + c2) == 'kh':
             tmp.lexeme += (c1 + c2)
             c = self.input.get_char()
@@ -230,28 +234,36 @@ class LexicalAnalyzer:
             case ',': tmp.TokenType = TokenType.COMMA
             case _:
                 if self.isdigit(c1):
+                    #could be a number or a roll with specified number of dice i.e. 3d6
                     self.input.unget_char(c1)
                     tmp = self.scan_number_or_roll()
                 elif c1 == 'd':
+                    #roll with one die i.e. d6
                     self.input.unget_char(c1)
                     tmp = self.scan_roll()
                 elif c1 == 'e':
+                    #could be roll with one exploding die or a bet of 'evens'
                     c2 = self.input.get_char()
                     if c2 == 'v':
+                        #bet of evens
                         self.input.unget_char(c2)
                         self.input.unget_char(c1)
                         tmp = self.scan_bet()
                     else:
+                        #roll with one exploding die
                         self.input.unget_char(c2)
                         self.input.unget_char(c1)
                         tmp = self.scan_roll()
                 elif c1 == 'o':
+                    #bet of odds
                     self.input.unget_char(c1)
                     tmp = self.scan_bet()
                 elif c1 == 'g':
+                    #start gambling
                     self.input.unget_char(c1)
                     tmp = self.scan_gamble()
                 elif c1 == 'h':
+                    #get roll history
                     self.input.unget_char(c1)
                     tmp = self.scan_recall()
                 else:

@@ -20,6 +20,7 @@ async def handle_expr(message: discord.Message, compute: Compute, rollSave: Roll
         result = compute.compute_expr(commandParser.stack[1])
     except:
         await handle_error(message)
+        return
     if compute.error or len(commandParser.stack) != 2:
         await handle_error(message)
     else:
