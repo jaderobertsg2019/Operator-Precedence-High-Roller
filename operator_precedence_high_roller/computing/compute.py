@@ -120,7 +120,7 @@ class Compute:
             num_rolls == num_keeps or 
             num_rolls < 1 or
             num_sides < 1 or
-            num_cuts < 1 or
+            num_cuts < 0 or
             num_keeps < 1 or
             num_rolls < num_cuts + num_keeps
         ):
