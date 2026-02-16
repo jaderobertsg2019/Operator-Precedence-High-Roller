@@ -69,7 +69,12 @@ class LexicalAnalyzer:
         c2 = self.input.get_char()
         if(c1 == 'c' and self.isdigit(c2)):
             tmp.lexeme += (c1 + c2)
-        elif (c1 + c2) == 'kh':
+        else:
+            self.input.unget_char(c2)
+            self.input.unget_char(c1)
+        c1 = self.input.get_char()
+        c2 = self.input.get_char()
+        if (c1 + c2) == 'kh':
             tmp.lexeme += (c1 + c2)
             c = self.input.get_char()
             if(self.isdigit(c)):
