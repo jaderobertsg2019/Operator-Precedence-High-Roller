@@ -222,7 +222,6 @@ class CommandParser:
                     break
             if self.is_valid_expr():
                 new_node = self.reduce_expr()
-                print()
                 self.stack.append(new_node)
             else:
                 print('syntax error in ' + self.input_string)
