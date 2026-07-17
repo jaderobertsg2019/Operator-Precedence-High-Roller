@@ -6,6 +6,7 @@ from operator_precedence_high_roller.parsing.command_parser import CommandParser
 from operator_precedence_high_roller.parsing.enums.command_type import CommandType
 from operator_precedence_high_roller.parsing.enums.token_type import TokenType
 from operator_precedence_high_roller.computing.compute import Compute
+from operator_precedence_high_roller.computing.computed_value import ComputedValue
 from operator_precedence_high_roller.json_handling.gambling.gamble import Gamble
 from operator_precedence_high_roller.json_handling.roll_saving.roll_save import RollSave
 import operator_precedence_high_roller.message_validator as mv
@@ -15,7 +16,7 @@ client = discord.Client(command_prefix='!', intents=intents)
 
 
 async def handle_expr(message: discord.Message, compute: Compute, rollSave: RollSave, commandParser: CommandParser):
-    result = (0,0)
+    result = ComputedValue(0, 0, False)
     try:
         result = compute.compute_expr(commandParser.stack[1])
     except:
@@ -28,7 +29,9 @@ async def handle_expr(message: discord.Message, compute: Compute, rollSave: Roll
         to_send = ""
         for i in range(len(compute.cocked_rolls)):
             to_send += 'Honor the cock. Roll ' + str(compute.cocked_rolls[i][1]) + ' was cocked. It would have been ' + str(compute.cocked_rolls[i][0]) + '\n'
-        to_send += str(result[0]) + '\nDetails: ' + str(compute.all_lists_of_rolls) + '\nAverage: ' + str(result[1])
+        to_send += str(result.value) + '\nDetails: ' + str(compute.all_lists_of_rolls) + '\nAverage: ' + str(result.average)
+        if(result.twisted):
+            to_send += '\nTwist!'
         if len(commandParser.stack) != 2 or (len(to_send)) > 2000:
             await handle_error(message)
         await message.channel.send(to_send)

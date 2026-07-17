@@ -80,7 +80,9 @@ class LexicalAnalyzer:
             if(self.isdigit(c)):
                 return self.scan_num_sides_or_keeps(tmp, c)
             else:
-                if not self.input.end_of_input():
+                if(c == 't'): #if we're doing twists
+                    tmp.lexeme += c
+                elif not self.input.end_of_input():
                     self.input.unget_char(c)
                 tmp.TokenType = TokenType.ROLL
                 return tmp
