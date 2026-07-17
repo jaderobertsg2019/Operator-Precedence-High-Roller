@@ -1,5 +1,6 @@
 from operator_precedence_high_roller.parsing.stacknode import StackNode
 from operator_precedence_high_roller.parsing.enums.token_type import TokenType
+from operator_precedence_high_roller.computing.computed_value import ComputedValue
 import random
 
 class Compute:
@@ -9,6 +10,7 @@ class Compute:
         self.all_lists_of_rolls = []
         self.list_of_dice = []
         self.error = False
+        self.strict_twists = True
         self.cocked_odds = 0.025
 
     def find_max_rolls(self, list_of_rolls, num_cuts, num_keeps):
@@ -34,6 +36,27 @@ class Compute:
             final_list.append(minVal)
             b[minIndex] = maximum
         return final_list
+    
+    def find_max_duplicate(self, list_of_rolls):
+        newlist = [] # empty list to hold unique elements from the list
+        duplicates = [] # empty list to hold the duplicate elements from the list
+        for i in list_of_rolls:
+            if i not in newlist:
+                newlist.append(i)
+            elif i not in duplicates:
+                duplicates.append(i)
+        return max(duplicates, default=None)
+    
+    def check_for_twists(self, list_of_rolls, num_cuts):
+        max_duplicate = self.find_max_duplicate(list_of_rolls)
+        if self.strict_twists:
+            max_roll = self.find_max_rolls(list_of_rolls, num_cuts, num_keeps=1)[0]
+            if max_duplicate == max_roll:
+                return True
+        else:
+            if max_duplicate != None:
+                return True
+        return False
 
     def roll_regular_die(self, to_roll: str):
         try:
@@ -61,7 +84,7 @@ class Compute:
         self.all_lists_of_rolls.append(list_of_rolls)
         roll_avg = int((1+num_sides)/2*num_rolls)
         self.list_of_dice.append(('' if num_rolls == 1 else str(num_rolls)) + 'd' + str(num_sides))
-        return (rolled_total, roll_avg)
+        return ComputedValue(rolled_total, roll_avg, False)
 
     def roll_exploding_die(self, to_roll: str):
         try:
@@ -99,7 +122,7 @@ class Compute:
             roll_avg = 1
         self.all_lists_of_rolls.append(list_of_rolls)
         self.list_of_dice.append(('' if num_rolls == 1 else str(num_rolls)) + 'e' + str(num_sides))
-        return (rolled_total, roll_avg)
+        return ComputedValue(rolled_total, roll_avg, False)
 
     def roll_kh_die(self, to_roll: str):
         try:
@@ -111,7 +134,12 @@ class Compute:
                 num_cuts = int(to_roll[to_roll.index('c')+1:to_roll.index('kh')])
             else:
                 num_sides = int(to_roll[to_roll.index('d')+1:to_roll.index('kh')])
-            num_keeps = int(to_roll[to_roll.index('kh')+2:]) if to_roll[to_roll.index('kh')+2:] != '' else 1
+            if 't' in to_roll:
+                num_keeps = int(to_roll[to_roll.index('kh')+2:-1]) if to_roll[to_roll.index('kh')+2:-1] != '' else 1
+            else:
+                num_keeps = int(to_roll[to_roll.index('kh')+2:]) if to_roll[to_roll.index('kh')+2:] != '' else 1
+            twists_enabled = ('t' in to_roll)
+            roll_twisted = False
         except:
             return None
         if (
@@ -133,11 +161,14 @@ class Compute:
                 self.cocked_rolls.append((random.randint(1, num_sides), self.i))
             roll = random.randint(1, num_sides)
             list_of_rolls.append(roll)
+        if twists_enabled:
+            roll_twisted = self.check_for_twists(list_of_rolls, num_cuts)
         self.all_lists_of_rolls.append(list_of_rolls)
         #there's probably a formula/process to accurately calculate the average for any of these, but idk what it is yet
         roll_avg = 0
         self.list_of_dice.append(('' if num_rolls == 1 else str(num_rolls)) + 'd' + str(num_sides))
-        return (sum(self.find_max_rolls(list_of_rolls, num_cuts, num_keeps)), roll_avg)
+        #return (sum(self.find_max_rolls(list_of_rolls, num_cuts, num_keeps)), roll_avg, roll_twisted)
+        return ComputedValue(sum(self.find_max_rolls(list_of_rolls, num_cuts, num_keeps)), roll_avg, roll_twisted)
 
     def roll_kl_die(self, to_roll: str):
         try:
@@ -166,7 +197,7 @@ class Compute:
         self.all_lists_of_rolls.append(list_of_rolls)
         roll_avg = 0
         self.list_of_dice.append(('' if num_rolls == 1 else str(num_rolls)) + 'd' + str(num_sides))
-        return (sum(self.find_min_rolls(list_of_rolls, num_keeps)), roll_avg)
+        return ComputedValue(sum(self.find_min_rolls(list_of_rolls, num_keeps)), roll_avg, False)
     
     def roll_die(self, to_roll: str):
         if 'kh' in to_roll:
@@ -183,32 +214,32 @@ class Compute:
     def compute_expr(self, reduced_expr: StackNode):
         try:
             res_left = self.compute_expr(reduced_expr.left)
-            left_expr = (res_left[0], res_left[1])
+            left_expr = ComputedValue(res_left.value, res_left.average, res_left.twisted)
             res_right = self.compute_expr(reduced_expr.right)
-            right_expr = (res_right[0], res_right[1])
+            right_expr = ComputedValue(res_right.value, res_right.average, res_right.twisted)
             if reduced_expr.oper == TokenType.PLUS:
-                return (left_expr[0] + right_expr[0], left_expr[1] + right_expr[1])
+                return ComputedValue(left_expr.value + right_expr.value, left_expr.average + right_expr.average, left_expr.twisted or right_expr.twisted)
             elif reduced_expr.oper == TokenType.MINUS:
-                return (left_expr[0] - right_expr[0], left_expr[1] - right_expr[1])
+                return ComputedValue(left_expr.value - right_expr.value, left_expr.average - right_expr.average, left_expr.twisted or right_expr.twisted)
             elif reduced_expr.oper == TokenType.MULT:
-                return (left_expr[0] * right_expr[0], left_expr[1] * right_expr[1])
+                return ComputedValue(left_expr.value * right_expr.value, left_expr.average * right_expr.average, left_expr.twisted or right_expr.twisted)
             elif reduced_expr.oper == TokenType.DIV:
-                if right_expr[0] == 0:
+                if right_expr.value == 0:
                     self.error = True
-                    return 0
-                return (int(left_expr[0] / right_expr[0]), int(left_expr[1] / right_expr[1]))
+                    return ComputedValue(0, 0, False)
+                return ComputedValue(int(left_expr.value / right_expr.value), int(left_expr.average / right_expr.average), (left_expr.twist or right_expr.twist))
         except:
             if reduced_expr.token_info.TokenType == TokenType.ERROR:
                 self.error = True
-                return 0
+                return ComputedValue(0, 0, False)
             elif 'd' in reduced_expr.token_info.lexeme:
                 to_roll = reduced_expr.token_info.lexeme
                 res = self.roll_die(to_roll)
-                return (res[0], res[1])
+                return ComputedValue(res.value, res.average, res.twisted)
             elif 'e' in reduced_expr.token_info.lexeme:
                 to_roll = reduced_expr.token_info.lexeme
                 res = self.roll_exploding_die(to_roll)
-                return (res[0], res[1])
+                return ComputedValue(res.value, res.average, False)
             else:
                 num = int(reduced_expr.token_info.lexeme)
-                return (num, num)
+                return ComputedValue(num, num, False)
